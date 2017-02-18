@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title></title>
+  <style type="text/css">code{white-space: pre;}</style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<h1 id="quick-ni-daq-recording">Quick NI-DAQ recording</h1>
+<p>NIDAQ (例えば USB6009) を使用して GUI つき簡易記録．</p>
+<h2 id="usage">Usage</h2>
+<p>MainRecDAQ.m を MATLAB 上で実行．<br />
+Live Plot が自動でスタート．止めたいときは，Pause ボタン．再開する場合は，Start ボタン．<br />
+Live Plot は現在の入力を見ているだけで，記録はしてない．</p>
+<p>データを記録する場合は，Capture．<br />
+Capture を押すと 域値を超える入力がくるまで待機．域値の設定は，Pause 中に Trigger Level で編集．<br />
+取得データの範囲（時間）は，Trigger の前後数秒． 設定は，Pause 中に Capture Pre-Trig, Post-Trig で編集．</p>
+<p>Triger 入力されると，指定した時間文のデータが Varibale Name で指定した 変数で MATLAB の workspace に保存．<br />
+複数回記録した場合は，データが追加．<br />
+記録したデータを書きだすときは，GUI 左下の SaveVars ボタンを押す．</p>
+<h3 id="others">Others</h3>
+<p>Sampling Rate 及び，Live plot の範囲も，GUI から変更可能．</p>
+</body>
+</html>
