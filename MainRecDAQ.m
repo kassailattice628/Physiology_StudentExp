@@ -22,7 +22,7 @@ while s.IsRunning
 end
 
 
-disp('end')
+disp('Stop')
 
 %% nested functions
 
@@ -30,28 +30,36 @@ disp('end')
 end % end of MainRecDAQ
 
 
-%% subfunctions
+%% %%%%%%%%%%%%%%%%%%%%  subfunctions %%%%%%%%%%%%%%%%%%%% %%
 
 function [s, Ch, capture] = setDAQsession
 
-s = daq.createSession('ni');
-
-% Device ID setting
-Ch = addAnalogInputChannel(s, 'Dev2', 0, 'Voltage');
-Ch.TerminalConfig = 'Differential';
-Ch.Range = [-10.0, 10.0];
-
-s.Rate = 3000;
-s.DurationInSeconds = 5;
-%s.NotifyWhenDataAvailableExceeds = s.Rate * s.DurationInSeconds / 10;
-
-%
-capture.TimeSpan = 5;
-capture.plotTimeSpan = 5;
-callbackTimeSpan = double(s.NotifyWhenDataAvailableExceeds)/s.Rate;
-capture.bufferTimeSpan = max([capture.plotTimeSpan, capture.TimeSpan*2, callbackTimeSpan*3]);
-capture.bufferSize = round(capture.bufferTimeSpan * s.Rate);
-
+if exist('daq', 'file')==7
+    s = daq.createSession('ni');
+    
+    % Device ID setting
+    Ch = addAnalogInputChannel(s, 'Dev1', 0, 'Voltage');
+    Ch.TerminalConfig = 'Differential';
+    Ch.Range = [-1.0, 1.0];
+    Ch.Coupling = 'DC';
+    
+    s.Rate = 30000; %sampling rate 30K
+    s.DurationInSeconds = 2;
+    %s.NotifyWhenDataAvailableExceeds = s.Rate * s.DurationInSeconds / 10;
+    
+    %
+    capture.TimeSpan = 5;
+    capture.plotTimeSpan = 2;
+    callbackTimeSpan = double(s.NotifyWhenDataAvailableExceeds)/s.Rate;
+    capture.bufferTimeSpan = max([capture.plotTimeSpan, capture.TimeSpan*2, callbackTimeSpan*3]);
+    capture.bufferSize = round(capture.bufferTimeSpan * s.Rate);
+    
+else
+    s = 0;
+    Ch = 0;
+    capture.TimeSpan = 5;
+    capture.plotTimeSpan = 5;
+end
 
 end
 
@@ -60,7 +68,7 @@ function hGui = createUI(s)
 %Create GUI and configure callback functions
 % "s" is DAQ session
 
-hGui.Fig = figure('NumberTitle', 'off', 'Resize', 'off', 'Position', [10 400 1000 650],...
+hGui.Fig = figure('NumberTitle', 'off', 'Resize', 'off', 'Position', [10 200 1000 650],...
     'DeleteFcn', {@endDAQ, s});
 
 %Create the continous data plot axes
@@ -84,12 +92,12 @@ title('Captured Data');
 % Select Sampling rate
 hGui.txtSampleRate = uicontrol('Style', 'Text', 'String', 'Sample Rate (Hz):', 'Position', [10 500 100 25],...
     'HorizontalAlignment', 'Right');
-hGui.SampleRate = uicontrol('Style', 'Edit', 'String', '3000', 'Units','Pixels', 'Position', [120 500 100 30]);
+hGui.SampleRate = uicontrol('Style', 'Edit', 'String', s.Rate , 'Units','Pixels', 'Position', [120 500 100 30]);
 
 % Set Duration (live plot)
 hGui.txtLiveDuration = uicontrol('Style', 'Text', 'String', 'Live Duration (s):', 'Position', [10 460 100 25],...
     'HorizontalAlignment', 'Right');
-hGui.LiveDuration = uicontrol('Style', 'Edit', 'String', '5', 'Units','Pixels', 'Position', [120 460 100 30]);
+hGui.LiveDuration = uicontrol('Style', 'Edit', 'String', '2', 'Units','Pixels', 'Position', [120 460 100 30]);
 
 
 % Select Channel for Trigger
@@ -173,13 +181,16 @@ if isvalid(s)
     end
 end
 
+
 delete(dataListener);
 delete(errorListener);
 end
+
 %%
 function startDAQ(~, ~, hGui)
 global s capture dataListener errorListener
 
+% GUI
 set(hGui.SampleRate,'Style', 'Text', 'Position', [120 495 100 30]);
 set(hGui.LiveDuration,'Style', 'Text', 'Position', [120 455 100 30]);
 
@@ -198,15 +209,20 @@ if s.IsRunning == false
     end
     s.Rate = str2double(get(hGui.SampleRate,'String'));
     s.DurationInSeconds = str2double(get(hGui.LiveDuration, 'String'));
-    capture.TimeSpan = str2double(get(hGui.CaptureDuration, 'String'));
-    capture.plotTimeSpan = str2double(get(hGui.CaptureDuration, 'String'));
+    capture.TimeSpan = str2double(get(hGui.CaptureDuration, 'String'))...
+        + str2double(get(hGui.CapturePreTrig,'string'));
+    capture.plotTimeSpan = str2double(get(hGui.LiveDuration, 'String'));
+        
     callbackTimeSpan = double(s.NotifyWhenDataAvailableExceeds)/s.Rate;
     capture.bufferTimeSpan = max([capture.plotTimeSpan, capture.TimeSpan * 2, callbackTimeSpan * 3]);
     capture.bufferSize = round(capture.bufferTimeSpan * s.Rate);
     
-   %% Restart
-   dataListener = addlistener(s, 'DataAvailable', @(src, event) dataCapture(src, event, capture, hGui));
-   errorListener = addlistener(s, 'ErrorOccurred', @(src, event) disp(getReport(event.Error)));
+    disp(capture.TimeSpan);
+    disp(capture.bufferSize)
+    
+    %% Restart
+    dataListener = addlistener(s, 'DataAvailable', @(src, event) dataCapture(src, event, capture, hGui));
+    errorListener = addlistener(s, 'ErrorOccurred', @(src, event) disp(getReport(event.Error)));
     s.IsContinuous = true;
     startBackground(s);
     
@@ -252,10 +268,14 @@ else
     prevData = dataBuffer(end, :);
 end
 
-latestData = [event.TimeStamps, event.Data];
+%event.Data is show in mV
+latestData = [event.TimeStamps, event.Data*1000];
+
+%dataBuffer‚µ‚Ä‚¨‚¢‚Ä Trigger point ‚³‚ª‚·
 dataBuffer = [dataBuffer; latestData];
 numSamplesToDiscard = size(dataBuffer,1) - c.bufferSize;
 
+%Updating buffer data
 if (numSamplesToDiscard > 0)
     dataBuffer(1:numSamplesToDiscard, :) = [];
 end
@@ -263,11 +283,13 @@ end
 % update live plot
 samplesToPlot = min([round(c.plotTimeSpan * src.Rate), size(dataBuffer,1)]);
 firstPoint = size(dataBuffer, 1) - samplesToPlot + 1;
+
 % update x-axis
 xlim(hGui.Axes1, [dataBuffer(firstPoint, 1), dataBuffer(end, 1)]);
+
 % Live plot has one line for each acquisition channel
 for ii = 1:numel(hGui.LivePlot)
-    set(hGui.LivePlot(ii), 'XData', dataBuffer(firstPoint:end, 1),...
+    set(hGui.LivePlot(ii), 'XData', dataBuffer(firstPoint:end, 1),...s
         'YData', dataBuffer(firstPoint:end, 1+ii))
 end
 
@@ -279,8 +301,8 @@ if captureRequested && (~trigActive)
     set(hGui.CaptureButton, 'String', 'Waiting', 'BackgroundColor', 'y');
     
     trigConfig.Channel = 1; %sscanf(get(hGui.TrigChannel, 'String'), '%u');
-    trigConfig.Level = sscanf(get(hGui.TrigLevel, 'String'), '%f');
-    trigConfig.Slope = sscanf(get(hGui.TrigSlope, 'String'), '%f');
+    trigConfig.Level = sscanf(get(hGui.TrigLevel, 'String'), '%f'); %mV
+    trigConfig.Slope = sscanf(get(hGui.TrigSlope, 'String'), '%f'); %V/s
     
     [trigActive, trigMoment] = detectTrig(prevData, latestData, trigConfig);
     
@@ -290,7 +312,7 @@ elseif captureRequested && trigActive && ((dataBuffer(end,1)-trigMoment) > c.Tim
     trigSampleIndex = find(dataBuffer(:,1) == trigMoment, 1, 'first') - pretrigDataPoint;
     lastSampleIndex = round(trigSampleIndex + c.TimeSpan * src.Rate);
     captureData = dataBuffer(trigSampleIndex:lastSampleIndex, :);
-    captureData(:,2:end) = captureData(:,2:end)*1000; % change unit, V -> mV
+    captureData(:,2:end) = captureData(:,2:end);
     
     trigActive = false;
     
@@ -299,6 +321,7 @@ elseif captureRequested && trigActive && ((dataBuffer(end,1)-trigMoment) > c.Tim
             'XData', captureData(:,1),...
             'YData', captureData(:, 1 + ii))
     end
+    xlim(hGui.Axes2, [captureData(1,1), captureData(end,1)]);
     
     set(hGui.CaptureButton, 'Value', 0);
     
