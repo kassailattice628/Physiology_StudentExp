@@ -21,9 +21,6 @@ while s.IsRunning
     pause(0.5);
 end
 
-
-disp('Stop')
-
 %% nested functions
 
 
@@ -70,7 +67,8 @@ function hGui = createUI(s)
 
 hGui.Fig = figure('NumberTitle', 'off', 'Resize', 'off', 'Position', [10 200 1000 650],...
     'DeleteFcn', {@endDAQ, s});
-
+% Plot Field
+%##########################################################################
 %Create the continous data plot axes
 %(one line per acquisition channel)
 hGui.Axes1 = axes('Units', 'Pixels', 'Position', [400 420 580 200]);
@@ -88,18 +86,23 @@ ylabel('Voltage (mv)');
 title('Captured Data');
 
 % Edit Field
-%
+%##########################################################################
 % Select Sampling rate
 hGui.txtSampleRate = uicontrol('Style', 'Text', 'String', 'Sample Rate (Hz):', 'Position', [10 500 100 25],...
     'HorizontalAlignment', 'Right');
 hGui.SampleRate = uicontrol('Style', 'Edit', 'String', s.Rate , 'Units','Pixels', 'Position', [120 500 100 30]);
 
-% Set Duration (live plot)
+% Set Live plot Duration 
 hGui.txtLiveDuration = uicontrol('Style', 'Text', 'String', 'Live Duration (s):', 'Position', [10 460 100 25],...
     'HorizontalAlignment', 'Right');
 hGui.LiveDuration = uicontrol('Style', 'Edit', 'String', '2', 'Units','Pixels', 'Position', [120 460 100 30]);
 
+uicontrol('Style', 'Text', 'String', 'Live Y-axis (mV)', 'Position', [10 420 100 25], 'HorizontalAlignment', 'Right');
+hGui.LiveYaxis = uicontrol('Style', 'Edit', 'String', 5, 'Position', [120 420 100 30]);
+uicontrol('Style', 'Text', 'String', '0: Auto ylim', 'Position', [225 420 100 25], 'HorizontalAlignment', 'Left');
 
+
+%###############################
 % Select Channel for Trigger
 hGui.txtTrigChannel = uicontrol('Style', 'Text', 'String', 'Trig Channel:', 'Position', [10 360 100 25],...
     'HorizontalAlignment', 'Right');
@@ -133,8 +136,8 @@ hGui.txtCaptureDuration = uicontrol('Style', 'Text', 'String', 'Capture Post-Tri
 hGui.CaptureDuration = uicontrol('Style', 'Edit', 'String', '5', 'Units','Pixels', 'Position', [120 160 100 30]);
 
 
-
-%%%%%%%Buttons%%%%%%%
+% Button Field
+%##########################################################################
 %Stop Button
 hGui.stopDAQButton = uicontrol('Style', 'Pushbutton', 'String', 'Pause', 'Units', 'Pixels', 'FontSize', 14,...
     'Position', [10 550 100 50], 'Callback', {@pauseDAQ, s, hGui});
@@ -170,7 +173,7 @@ global dataListener errorListener
 
 set(hGui.SampleRate,'Style', 'Edit', 'Position', [120 500 100 30]);
 set(hGui.LiveDuration,'Style', 'Edit', 'Position', [120 460 100 30]);
-
+set(hGui.LiveYaxis, 'Style', 'Edit', 'Position', [120 420 100 30]);
 %set(hGui.TrigChannel,'Style', 'Edit', 'Position', [120 355 100 30]);
 set(hGui.TrigLevel,'Style', 'Edit', 'Position', [120 320 100 30]);
 set(hGui.TrigSlope,'Style', 'Edit', 'Position', [120 280 100 30]);
@@ -196,7 +199,7 @@ global s capture dataListener errorListener
 % GUI
 set(hGui.SampleRate,'Style', 'Text', 'Position', [120 495 100 30]);
 set(hGui.LiveDuration,'Style', 'Text', 'Position', [120 455 100 30]);
-
+set(hGui.LiveYaxis, 'Style', 'Text', 'Position', [120 415 100 30]);
 %set(hGui.TrigChannel,'Style', 'Text', 'Position', [120 355 100 30]);
 set(hGui.TrigLevel,'Style', 'Text', 'Position', [120 315 100 30]);
 set(hGui.TrigSlope,'Style', 'Text', 'Position', [120 275 100 30]);
@@ -269,7 +272,7 @@ else
     prevData = dataBuffer(end, :);
 end
 
-%event.Data is show in mV
+%event.Data is shown in mV
 latestData = [event.TimeStamps, event.Data*1000];
 
 %dataBuffer‚µ‚Ä‚¨‚¢‚Ä Trigger point ‚³‚ª‚·
@@ -293,12 +296,16 @@ for ii = 1:numel(hGui.LivePlot)
     set(hGui.LivePlot(ii), 'XData', dataBuffer(firstPoint:end, 1),...s
         'YData', dataBuffer(firstPoint:end, 1+ii))
 end
-ylim(hGui.Axes1, [-5. 5]);
+ymax = str2double(get(hGui.LiveYaxis, 'String'));
+if ymax==0
+    ylim(hGui.Axes1, 'auto')
+else
+    ylim(hGui.Axes1, [-ymax ymax]);
+end
+
 
 % Get capture toggle button condition (1/0)
 captureRequested = get(hGui.CaptureButton, 'value');
-
-
 if captureRequested && (~trigActive)
     set(hGui.CaptureButton, 'String', 'Waiting', 'BackgroundColor', 'y');
     
@@ -314,7 +321,7 @@ elseif captureRequested && trigActive && ((dataBuffer(end,1)-trigMoment) > c.Tim
     trigSampleIndex = find(dataBuffer(:,1) == trigMoment, 1, 'first') - pretrigDataPoint;
     lastSampleIndex = round(trigSampleIndex + c.TimeSpan * src.Rate);
     captureData = dataBuffer(trigSampleIndex:lastSampleIndex, :);
-    captureData(:,2:end) = captureData(:,2:end);
+    captureData(:, 2:end) = captureData(:, 2:end);
     
     trigActive = false;
     
@@ -334,6 +341,7 @@ elseif captureRequested && trigActive && ((dataBuffer(end,1)-trigMoment) > c.Tim
     set(hGui.txtCaptNum, 'String', ['#=:' num2str(captNum)]);
     
 elseif captureRequested && trigActive && ((dataBuffer(end,1)-trigMoment) < c.TimeSpan)
+    %Wait for sufficient number of data points are stored.
     set(hGui.CaptureButton, 'String', 'Triggered', 'BackgroundColor', 'b');
     
 elseif ~captureRequested
@@ -346,7 +354,7 @@ end
 
 %%
 function [trigDetected, trigMoment] = detectTrig(prevData, latestData, trigConfig)
-%check level
+%check signal level
 trigCondition1 = latestData(:, 1 + trigConfig.Channel) > trigConfig.Level;
 data = [prevData; latestData];
 
