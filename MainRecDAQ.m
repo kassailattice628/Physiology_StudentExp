@@ -120,6 +120,8 @@ hGui.txtVarName = uicontrol('Style', 'Text', 'String', 'Variable Name:', 'Positi
     'HorizontalAlignment', 'Right');
 hGui.VarName = uicontrol('Style', 'Edit', 'String', 'mydata', 'Units','Pixels', 'Position', [120 240 100 30]);
 
+hGui.txtCaptNum = uicontrol('Style', 'Text', 'String', '#=:', 'Position', [225, 240, 50, 25], 'HorizontalAlignment', 'Left');
+
 % Set capture start timing (ms from the trigger timing)
 hGui.txtCapturePreTrig = uicontrol('Style', 'Text', 'String', 'Capture Pre-Trig Duration (s):', 'Position', [10 200 100 25],...
     'HorizontalAlignment', 'Right');
@@ -130,8 +132,9 @@ hGui.txtCaptureDuration = uicontrol('Style', 'Text', 'String', 'Capture Post-Tri
     'HorizontalAlignment', 'Right');
 hGui.CaptureDuration = uicontrol('Style', 'Edit', 'String', '5', 'Units','Pixels', 'Position', [120 160 100 30]);
 
-% Buttons
 
+
+%%%%%%%Buttons%%%%%%%
 %Stop Button
 hGui.stopDAQButton = uicontrol('Style', 'Pushbutton', 'String', 'Pause', 'Units', 'Pixels', 'FontSize', 14,...
     'Position', [10 550 100 50], 'Callback', {@pauseDAQ, s, hGui});
@@ -217,8 +220,6 @@ if s.IsRunning == false
     capture.bufferTimeSpan = max([capture.plotTimeSpan, capture.TimeSpan * 2, callbackTimeSpan * 3]);
     capture.bufferSize = round(capture.bufferTimeSpan * s.Rate);
     
-    disp(capture.TimeSpan);
-    disp(capture.bufferSize)
     
     %% Restart
     dataListener = addlistener(s, 'DataAvailable', @(src, event) dataCapture(src, event, capture, hGui));
@@ -292,6 +293,7 @@ for ii = 1:numel(hGui.LivePlot)
     set(hGui.LivePlot(ii), 'XData', dataBuffer(firstPoint:end, 1),...s
         'YData', dataBuffer(firstPoint:end, 1+ii))
 end
+ylim(hGui.Axes1, [-5. 5]);
 
 % Get capture toggle button condition (1/0)
 captureRequested = get(hGui.CaptureButton, 'value');
@@ -328,6 +330,8 @@ elseif captureRequested && trigActive && ((dataBuffer(end,1)-trigMoment) > c.Tim
     varName = get(hGui.VarName, 'String');
     varCell{captNum} = captureData;
     assignin('base', varName, varCell);
+    
+    set(hGui.txtCaptNum, 'String', ['#=:' num2str(captNum)]);
     
 elseif captureRequested && trigActive && ((dataBuffer(end,1)-trigMoment) < c.TimeSpan)
     set(hGui.CaptureButton, 'String', 'Triggered', 'BackgroundColor', 'b');
