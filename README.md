@@ -1,12 +1,12 @@
-# Quick NI-DAQ recording
+# Quick NI-DAQ recording on MATLAB
 NIDAQ (例えば USB6009) を使用して GUI つき簡易記録．
 
----
+ーーー
 ## Requirement
-Windwos 7, 8 (64bit) で動作確認．  
-MATLAB 64bit R2016 a, b で動作確認．  
-Data acuisition toolbox (64bit) 必須．  
-NIDAQ サポートパッケージ（MATLAB アドオンから入手）  
+1. Windwos 7, 8 (64bit) で動作確認．  
+2. MATLAB 64bit R2016 a, b で動作確認．  
+3. Data acquisition toolbox (64bit) 必須．  
+4. NIDAQ サポートパッケージ（MATLAB アドオンから入手）
 
 ### Instration Drivers
 おそらく MATLAB R2016a 以降は，MATLAB のアドオン追加機能からドライバを入れた方が良い．  
@@ -19,31 +19,35 @@ NI デバイスモニタ など PC 上で認識されてるデバイス ID を M
 デフォルトは 'Dev2'.
 
 ### Input Channel
-現在は，差動入力で Ch(1) から記録できるのみ．
+現在は，差動入力で Ch(1) しか設定していない（AI0)．  
 
 ---
 ## Usage
-MainRecDAQ.m を MATLAB 上で実行．  
-Live Plot が自動でスタート．止めたいときは，Pause ボタン．再開する場合は，Start ボタン．  
-Live Plot は現在の入力を見ているだけで，記録はしてない．  
+```MainRecDAQ.m
+> cd ('path/to/program/folders/')
+> MainRecDAQ
+```
+1. Live Plot が自動でスタート．Live 止めるときは，Pause ボタン．Live 再開は，Start ボタン．  
+Lie Plot は現在の入力を見ているだけで，記録はしてない．  
 
-データを記録する場合は，Capture．  
+2. データを記録する場合は，Capture．  
 Capture を押すと 域値を超える入力がくるまで待機．域値の設定は，Pause 中に Trigger Level で編集．  
-取得データの範囲（時間）は，Trigger の前後数秒． 設定は，Pause 中に Capture Pre-Trig, Post-Trig で編集．
+取得データの範囲（時間）は，Trigger の前後数秒． 設定は，Pause 中に Capture Pre-Trig, Post-Trig で編集．  
 
-Triger 入力されると，指定した時間文のデータが Varibale Name で指定した 変数で MATLAB の workspace に保存．  
+3. Triger 入力されると，指定した時間文のデータが Varibale Name で指定した 変数で MATLAB の workspace に保存．  
 複数回記録した場合は，データが追加．  
-記録したデータを書きだすときは，GUI 左下の SaveVars ボタンを押す．
+記録したデータを書きだすときは，GUI 左下の SaveVars ボタンを押す．  
 
 ### Others
-Sampling Rate 及び，Live plot の範囲も，GUI から変更可能．
+Sampling Rate 及び，Live plot の範囲も，GUI から変更
 
 ---
 ### ToDos
-記録開始の Trigger 設定を見直す．  
-Trigger なしでも記録できるようにする．  
-Threshold, slope(はやめる？)．  
-Sampling Rate の確認．（あってない？）．  デフォルト 50K とかにするか
+- 記録開始の Trigger 設定を見直す． >>>> event.data を *1000 して mV 表示にした．  
+- Trigger なしでも記録できるようにする． <<<< これはやらない？  
+- Threshold, slope(はやめる？)． <<<< これも mV 表示で対応できた？  
+ 
+- Sampling Rate の確認．（あってない？）．デフォルト 50K とかにするか >>>> USB6009 は max 48K なので 30K をデフォルトにした  
 
-AC 結合っぽく表示できないか？どうか？．  デジタルフィルタでなんとかなるのか？
+- AC 結合っぽく表示できないか？どうか？．  デジタルフィルタでなんとかなるのか？
 

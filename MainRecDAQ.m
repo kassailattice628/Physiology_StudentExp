@@ -1,25 +1,17 @@
 function MainRecDAQ
 
 close all
-global s Ch capture dataListener errorListener hGui captNum
+global s Ch capture hGui captNum
 
 % initialize parameters
 [s, Ch, capture] = setDAQsession;
 captNum = 0;
 
 % open GUI
-hGui = createUI(s);
+hGui = createUI(s, capture);
 
-% Add a listener for DataAvailable events
-dataListener = addlistener(s, 'DataAvailable', @(src, event) dataCapture(src, event, capture, hGui));
-errorListener = addlistener(s, 'ErrorOccurred', @(src, event) disp(getReport(event.Error)));
-
-s.IsContinuous = true;
-startBackground(s);
-
-while s.IsRunning
-    pause(0.5);
-end
+% start monitring
+%startDAQ([],[], hGui);
 
 %% nested functions
 
@@ -29,6 +21,8 @@ end % end of MainRecDAQ
 
 %% %%%%%%%%%%%%%%%%%%%%  subfunctions %%%%%%%%%%%%%%%%%%%% %%
 
+
+%%
 function [s, Ch, capture] = setDAQsession
 
 if exist('daq', 'file')==7
@@ -41,15 +35,16 @@ if exist('daq', 'file')==7
     Ch.Coupling = 'DC';
     
     s.Rate = 30000; %sampling rate 30K
-    s.DurationInSeconds = 2;
+    s.DurationInSeconds = 1;
     %s.NotifyWhenDataAvailableExceeds = s.Rate * s.DurationInSeconds / 10;
     
-    %
-    capture.TimeSpan = 5;
-    capture.plotTimeSpan = 2;
+    capture.plotTimeSpan = 2;   % Live Plot Duration
+    capture.TimeSpan = 5;       % Captured data duration (after trigger detected)
+    
     callbackTimeSpan = double(s.NotifyWhenDataAvailableExceeds)/s.Rate;
     capture.bufferTimeSpan = max([capture.plotTimeSpan, capture.TimeSpan*2, callbackTimeSpan*3]);
     capture.bufferSize = round(capture.bufferTimeSpan * s.Rate);
+    %}
     
 else
     s = 0;
@@ -61,12 +56,13 @@ end
 end
 
 %%
-function hGui = createUI(s)
-%Create GUI and configure callback functions
+function hGui = createUI(s, c)
+% Create GUI and configure callback functions
 % "s" is DAQ session
 
 hGui.Fig = figure('NumberTitle', 'off', 'Resize', 'off', 'Position', [10 200 1000 650],...
     'DeleteFcn', {@endDAQ, s});
+
 % Plot Field
 %##########################################################################
 %Create the continous data plot axes
@@ -95,10 +91,10 @@ hGui.SampleRate = uicontrol('Style', 'Edit', 'String', s.Rate , 'Units','Pixels'
 % Set Live plot Duration 
 hGui.txtLiveDuration = uicontrol('Style', 'Text', 'String', 'Live Duration (s):', 'Position', [10 460 100 25],...
     'HorizontalAlignment', 'Right');
-hGui.LiveDuration = uicontrol('Style', 'Edit', 'String', '2', 'Units','Pixels', 'Position', [120 460 100 30]);
+hGui.LiveDuration = uicontrol('Style', 'Edit', 'String', c.plotTimeSpan, 'Units','Pixels', 'Position', [120 460 100 30]);
 
 uicontrol('Style', 'Text', 'String', 'Live Y-axis (mV)', 'Position', [10 420 100 25], 'HorizontalAlignment', 'Right');
-hGui.LiveYaxis = uicontrol('Style', 'Edit', 'String', 5, 'Position', [120 420 100 30]);
+hGui.LiveYaxis = uicontrol('Style', 'Edit', 'String', c.TimeSpan, 'Position', [120 420 100 30]);
 uicontrol('Style', 'Text', 'String', '0: Auto ylim', 'Position', [225 420 100 25], 'HorizontalAlignment', 'Left');
 
 
@@ -111,12 +107,12 @@ hGui.TrigChannel = uicontrol('Style', 'Text', 'String', 'Ch(1)', 'Units','Pixels
 % Trigger Level (Threshold)
 hGui.txtTrigLevel = uicontrol('Style', 'Text', 'String', 'Trig Level (mV):', 'Position', [10 320 100 25],...
     'HorizontalAlignment', 'Right');
-hGui.TrigLevel = uicontrol('Style', 'Edit', 'String', '1', 'Units','Pixels', 'Position', [120 320 100 30]);
+hGui.TrigLevel = uicontrol('Style', 'Edit', 'String', 1, 'Units','Pixels', 'Position', [120 320 100 30]);
 
 % Trig Slope
 hGui.txtTrigSlope = uicontrol('Style', 'Text', 'String', 'Trig Sloe (V/s):', 'Position', [10 280 100 25],...
     'HorizontalAlignment', 'Right');
-hGui.TrigSlope = uicontrol('Style', 'Edit', 'String', '200', 'Units','Pixels', 'Position', [120 280 100 30]);
+hGui.TrigSlope = uicontrol('Style', 'Edit', 'String', 200, 'Units','Pixels', 'Position', [120 280 100 30]);
 
 % default setting: mydata
 hGui.txtVarName = uicontrol('Style', 'Text', 'String', 'Variable Name:', 'Position', [10 240 100 25],...
@@ -128,12 +124,12 @@ hGui.txtCaptNum = uicontrol('Style', 'Text', 'String', '#=:', 'Position', [225, 
 % Set capture start timing (ms from the trigger timing)
 hGui.txtCapturePreTrig = uicontrol('Style', 'Text', 'String', 'Capture Pre-Trig Duration (s):', 'Position', [10 200 100 25],...
     'HorizontalAlignment', 'Right');
-hGui.CapturePreTrig = uicontrol('Style', 'Edit', 'String', '0', 'Units','Pixels', 'Position', [120 200 100 30]);
+hGui.CapturePreTrig = uicontrol('Style', 'Edit', 'String', 0, 'Units','Pixels', 'Position', [120 200 100 30]);
 
 % Set capture Duration
 hGui.txtCaptureDuration = uicontrol('Style', 'Text', 'String', 'Capture Post-Trig Duration (s):', 'Position', [10 160 100 25],...
     'HorizontalAlignment', 'Right');
-hGui.CaptureDuration = uicontrol('Style', 'Edit', 'String', '5', 'Units','Pixels', 'Position', [120 160 100 30]);
+hGui.CaptureDuration = uicontrol('Style', 'Edit', 'String', 5, 'Units','Pixels', 'Position', [120 160 100 30]);
 
 
 % Button Field
@@ -170,7 +166,7 @@ end
 %%
 function pauseDAQ(~, ~, s, hGui)
 global dataListener errorListener
-
+%GUI
 set(hGui.SampleRate,'Style', 'Edit', 'Position', [120 500 100 30]);
 set(hGui.LiveDuration,'Style', 'Edit', 'Position', [120 460 100 30]);
 set(hGui.LiveYaxis, 'Style', 'Edit', 'Position', [120 420 100 30]);
@@ -187,7 +183,6 @@ if isvalid(s)
     end
 end
 
-
 delete(dataListener);
 delete(errorListener);
 end
@@ -195,7 +190,6 @@ end
 %%
 function startDAQ(~, ~, hGui)
 global s capture dataListener errorListener
-
 % GUI
 set(hGui.SampleRate,'Style', 'Text', 'Position', [120 495 100 30]);
 set(hGui.LiveDuration,'Style', 'Text', 'Position', [120 455 100 30]);
@@ -207,24 +201,22 @@ set(hGui.VarName,'Style', 'Text', 'Position', [120 235 100 30]);
 set(hGui.CapturePreTrig,'Style', 'Text', 'Position', [120 195 100 30]);
 set(hGui.CaptureDuration,'Style', 'Text', 'Position', [120 155 100 30]);
 
-
 if s.IsRunning == false
-    %% Reload params from GUI
+    % Reload params from GUI
     if s.IsContinuous
         s.IsContinuous = false;
     end
     s.Rate = str2double(get(hGui.SampleRate,'String'));
-    s.DurationInSeconds = str2double(get(hGui.LiveDuration, 'String'));
+    
+    capture.plotTimeSpan = str2double(get(hGui.LiveDuration, 'String'));
     capture.TimeSpan = str2double(get(hGui.CaptureDuration, 'String'))...
         + str2double(get(hGui.CapturePreTrig,'string'));
-    capture.plotTimeSpan = str2double(get(hGui.LiveDuration, 'String'));
-        
     callbackTimeSpan = double(s.NotifyWhenDataAvailableExceeds)/s.Rate;
     capture.bufferTimeSpan = max([capture.plotTimeSpan, capture.TimeSpan * 2, callbackTimeSpan * 3]);
     capture.bufferSize = round(capture.bufferTimeSpan * s.Rate);
     
     
-    %% Restart
+    % Restart
     dataListener = addlistener(s, 'DataAvailable', @(src, event) dataCapture(src, event, capture, hGui));
     errorListener = addlistener(s, 'ErrorOccurred', @(src, event) disp(getReport(event.Error)));
     s.IsContinuous = true;
@@ -254,15 +246,25 @@ end
 %%
 function saveVars(~, ~, hGui)
 %Save captureed data to the mat file
+
 savedata = evalin('base', get(hGui.VarName, 'String'));
+
+%cell is saved as [hGui.VarName].mat.
+%Opening this mat file, 'savedata' is loaded as the base workspace
 save(get(hGui.VarName, 'String'), 'savedata');
+
+save SaveVars.mat savedata
 end
 
 %%
+%%#######################################################################%%
 function dataCapture(src, event, c, hGui)
+%dataCapture is called when DAQ data are readable.
+
 global captNum
 persistent dataBuffer trigActive trigMoment varCell
 
+%reset bufferd data
 if event.TimeStamps(1)==0
     dataBuffer = [];          % data buffer
     trigActive = false;       % trigger condition flag
@@ -272,10 +274,10 @@ else
     prevData = dataBuffer(end, :);
 end
 
-%event.Data is shown in mV
+%event.Data is shown in mV (event.Data is multiplied by 1000)
 latestData = [event.TimeStamps, event.Data*1000];
 
-%dataBuffer‚µ‚Ä‚¨‚¢‚Ä Trigger point ‚³‚ª‚·
+%Update dataBuffer
 dataBuffer = [dataBuffer; latestData];
 numSamplesToDiscard = size(dataBuffer,1) - c.bufferSize;
 
@@ -336,6 +338,7 @@ elseif captureRequested && trigActive && ((dataBuffer(end,1)-trigMoment) > c.Tim
     
     varName = get(hGui.VarName, 'String');
     varCell{captNum} = captureData;
+    % captured data is shown in the base workspace 
     assignin('base', varName, varCell);
     
     set(hGui.txtCaptNum, 'String', ['#=:' num2str(captNum)]);
