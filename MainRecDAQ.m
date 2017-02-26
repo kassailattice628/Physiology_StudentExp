@@ -31,7 +31,7 @@ if exist('daq', 'file')==7
     % Device ID setting
     Ch = addAnalogInputChannel(s, 'Dev1', 0, 'Voltage');
     Ch.TerminalConfig = 'Differential';
-    Ch.Range = [-1.0, 1.0];
+    Ch.Range = [-5.0, 5.0];
     Ch.Coupling = 'DC';
     
     s.Rate = 30000; %sampling rate 30K
@@ -107,7 +107,7 @@ hGui.TrigChannel = uicontrol('Style', 'Text', 'String', 'Ch(1)', 'Units','Pixels
 % Trigger Level (Threshold)
 hGui.txtTrigLevel = uicontrol('Style', 'Text', 'String', 'Trig Level (mV):', 'Position', [10 320 100 25],...
     'HorizontalAlignment', 'Right');
-hGui.TrigLevel = uicontrol('Style', 'Edit', 'String', 1, 'Units','Pixels', 'Position', [120 320 100 30]);
+hGui.TrigLevel = uicontrol('Style', 'Edit', 'String', 800, 'Units','Pixels', 'Position', [120 320 100 30]);
 
 % Trig Slope
 hGui.txtTrigSlope = uicontrol('Style', 'Text', 'String', 'Trig Sloe (V/s):', 'Position', [10 280 100 25],...
