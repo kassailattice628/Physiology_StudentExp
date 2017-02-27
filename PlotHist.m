@@ -1,4 +1,11 @@
-function PlotHist(var, n, th, rectime, weight)
+function h = PlotHist(var, n, th, rectime, weight)
+% Plot raw trace and Histogram, with rectime/10 sec bin width).
+% var: name of cell variable ('savedata')
+% n: trial number to show
+% th: spike threshold (mV), 300~1000 ?
+% rectime: recording time. rectime/10 is used for bin wdith.
+% weight: number or string, if this parameters is set, PDF file of the plot
+% is saved in the working directry.
 
 switch nargin
     case 5
@@ -34,7 +41,6 @@ xlim([t(1), t(end)]);
 hold on;
 plot(t(ind), th, 'm*');
 hold off
-
 ax = gca;
 outerpos = ax.OuterPosition;
 ti = ax.TightInset;
@@ -46,7 +52,9 @@ ax.Position = [left bottom ax_width ax_height];
 
 %% histogram
 subplot(2,1,2)
-histogram(t(ind), rectime);
+
+binw = rectime*5; % binned with 100 ms
+h = histogram(t(ind), binw); 
 xlim([t(1), t(end)]);
 ax = gca;
 outerpos = ax.OuterPosition;
@@ -63,7 +71,8 @@ fig_pos = fig.PaperPosition;
 fig.PaperSize = [fig_pos(3) fig_pos(4)];
 
 if nargin ==  5
-print(fig,['Histogram_',weight],'-dpdf')
+    title(['Weight = ', weight, ' g']);
+    print(fig,['Histogram_',weight],'-dpdf')
 end
 
 end
