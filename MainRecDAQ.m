@@ -35,7 +35,7 @@ if exist('daq', 'file')==7
     Ch.Coupling = 'DC';
     
     s.Rate = 30000; %sampling rate 30K
-    s.DurationInSeconds = 1;
+    s.DurationInSeconds = 0.1;
     %s.NotifyWhenDataAvailableExceeds = s.Rate * s.DurationInSeconds / 10;
     
     capture.plotTimeSpan = 2;   % Live Plot Duration

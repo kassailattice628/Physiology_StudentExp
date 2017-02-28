@@ -1,4 +1,4 @@
-function h = PlotHist(var, n, th, rectime, weight)
+function PlotHist(var, n, th, rectime, weight)
 % Plot raw trace and Histogram, with rectime/10 sec bin width).
 % var: name of cell variable ('savedata')
 % n: trial number to show
@@ -62,10 +62,19 @@ bottom = outerpos(2) + ti(2);
 ax_height = outerpos(4) - ti(2) - ti(4);
 ax.Position = [left bottom ax_width ax_height];
 
+%% Fitting
+%{
+bint = (t(1):0.1:t(end))';
+biny = h.Values';
+hold on
+%plot(bint,biny, 'gx');
+offset =  mean(biny(end-100:end));
+f = fit(bint(1:3:99), biny(1:3:99)-offset,'exp1');
+%}
+hold off
+
 %% savefig
 fig = gcf;
-
-
 fig.PaperPositionMode = 'auto';
 fig_pos = fig.PaperPosition;
 fig.PaperSize = [fig_pos(3) fig_pos(4)];
