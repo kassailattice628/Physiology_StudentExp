@@ -1,8 +1,12 @@
-function PlotRaw(var, n, t1, t_length, savef)
+function PlotRaw(var, n, select_range, t_length, savef)
 %Plot raw data
 %var: saved variable (cell)
 %n: # of var's row which you wnat to see the trace
-%
+%select_range: select time range for showing in the figure or PS file
+%([start, end]) (sec):
+%t_length: time length for single row trace. (sec)
+%savef: save flag. save multi-page PS file when savef=1)
+
 %%
 switch nargin
     case 4
@@ -21,8 +25,23 @@ else
     d=var(:,2);
 end
 
+%select range
+if isempty(select_range)
+    s_i = 1;
+    e_i = length(t);
+elseif length(select_range) == 2
+    s_i = find(t < select_range(1), 1, 'last')+1;
+    e_i = find(t < select_range(2), 1, 'last');
+elseif length(select_range) == 1
+    s_i = select_range;
+    e_i = length(t);
+end
+
+t = t(s_i:e_i);
+d = d(s_i:e_i);
+    
+
 %%
-%sampf =  30000;
 sampf =  1/(t(2)-t(1));
 range1 = t_length*sampf;
 
@@ -46,7 +65,7 @@ for ii = 1:n_page %n_page
     %---------------------------------------------------------
     
     for i = 1:4 %4 subplots are shown in a page pf PDF file.
-        range_plot = round(range_p*(ii-1) + (range1*(i-1))+t1 : range_p*(ii-1) + range1*i);
+        range_plot = round(range_p*(ii-1) + (range1*(i-1)) + 1: range_p*(ii-1) + range1*i);
         if range_plot(end) > length(t)
             break
         end
@@ -57,7 +76,7 @@ for ii = 1:n_page %n_page
         xlim([t(range_plot(1)), t(range_plot(end))])
         ylim([min(d(range_plot)), max(d(range_plot))])
         
-        setax%(i, ii, ax);
+        setax(ax)%(i, ii, ax);
         
         
         %pos
@@ -88,8 +107,9 @@ for ii = 1:n_page %n_page
         close;
     end
 end
+
 %% set x label
-    function setax%(i, ii, ax1)
+    function setax(ax1)%(i, ii, ax1)
         ax1.XTickMode = 'manual';
         t_range = t(range_plot);
         tickpos = round(1:sampf*0.1:range1); % every 100 ms
