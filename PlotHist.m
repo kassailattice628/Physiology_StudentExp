@@ -6,7 +6,7 @@ function PlotHist(var, n, th, rectime, weight)
 % rectime: recording time. rectime/10 is used for bin wdith.
 % weight: number or string, if this parameters is set, PDF file of the plot
 % is saved in the working directry.
-
+ xd   g
 switch nargin
     case 5
         if isnumeric(weight)
@@ -15,13 +15,25 @@ switch nargin
     case 4
         weight =  '' ;
 end
+
 %data
-t = var{n}(:,1);
-y = var{n}(:,2);
+if iscell(var)
+    t = var{n}(:,1);
+    y = var{n}(:,2);
+else
+    t = var(:,1);
+    y = var(:,2);
+end
 
 %find spikes
-[~,ind] = findpeaks(y,'MinPeakHeight',th, 'MinPeakDistance',20);
+[~,ind] = findpeaks(y,'MinPeakHeight',th, 'MinPeakDistance', 20, 'MaxPeakWidth', 30, 'MinPeakWidth', 10) ;
+%slope check (threshold * 0.8 mV/ 0.5ms)
 
+%{
+ind2 = ind1 - 0.3*30000/1000; % 0.5ms before peak
+slope = y(ind1) - y(ind2);
+ind = ind1(slope > th*0.8);
+%}
 
 %% paper settings
 figure;

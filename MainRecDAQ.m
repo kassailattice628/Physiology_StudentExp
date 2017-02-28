@@ -308,6 +308,7 @@ end
 
 % Get capture toggle button condition (1/0)
 captureRequested = get(hGui.CaptureButton, 'value');
+
 if captureRequested && (~trigActive)
     set(hGui.CaptureButton, 'String', 'Waiting', 'BackgroundColor', 'y');
     
@@ -336,10 +337,15 @@ elseif captureRequested && trigActive && ((dataBuffer(end,1)-trigMoment) > c.Tim
     
     set(hGui.CaptureButton, 'Value', 0);
     
+    %save captured data in the base WS.
     varName = get(hGui.VarName, 'String');
     varCell{captNum} = captureData;
-    % captured data is shown in the base workspace 
+    %captured data is shown in the base workspace 
     assignin('base', varName, varCell);
+    
+    %save captured data in the DISK (as a single .mat file)
+    fname = [varName, '_', num2str(captNum), '.mat'];
+    save(fname, 'captureData');
     
     set(hGui.txtCaptNum, 'String', ['#=:' num2str(captNum)]);
     

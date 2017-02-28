@@ -3,7 +3,7 @@ function PlotRaw(var, n, t1, t_length, savef)
 %var: saved variable (cell)
 %n: # of var's row which you wnat to see the trace
 %
-
+%%
 switch nargin
     case 4
         savef = 0;
@@ -13,9 +13,15 @@ switch nargin
         end
 end
 
-t = var{n}(:,1);
-d = var{n}(:,2);
+if iscell(var)
+    t = var{n}(:,1);
+    d = var{n}(:,2);
+else
+    t=var(:,1);
+    d=var(:,2);
+end
 
+%%
 %sampf =  30000;
 sampf =  1/(t(2)-t(1));
 range1 = t_length*sampf;
@@ -40,16 +46,18 @@ for ii = 1:n_page %n_page
     %---------------------------------------------------------
     
     for i = 1:4 %4 subplots are shown in a page pf PDF file.
+        range_plot = round(range_p*(ii-1) + (range1*(i-1))+t1 : range_p*(ii-1) + range1*i);
+        if range_plot(end) > length(t)
+            break
+        end
         
-        disp(['page=', num2str(ii), ', subplot=', num2str(i)]);
         subplot(4,1,i);
-        range = range_p*(ii-1) + (range1*(i-1))+t1 : range_p*(ii-1) + range1*i;
-        plot(t(range), d(range))
+        plot(t(range_plot), d(range_plot))
         ax = gca;
-        xlim([t(range(1)), t(range(end))])
-        ylim([min(d(range)), max(d(range))])
+        xlim([t(range_plot(1)), t(range_plot(end))])
+        ylim([min(d(range_plot)), max(d(range_plot))])
         
-        setax(i, ii, ax);
+        setax%(i, ii, ax);
         
         
         %pos
@@ -81,10 +89,10 @@ for ii = 1:n_page %n_page
     end
 end
 %% set x label
-    function setax(i, ii, ax1)
+    function setax%(i, ii, ax1)
         ax1.XTickMode = 'manual';
-        t_range = t(range);
-        tickpos = 1:sampf*0.1:range1; % every 100 ms
+        t_range = t(range_plot);
+        tickpos = round(1:sampf*0.1:range1); % every 100 ms
         ax1.XTick =t_range(tickpos);
         ax1.XTickLabel = [0:0.1:0.9]+(i-1) + (ii-1)*4;
     end
