@@ -1,4 +1,4 @@
-function PlotRaw(var, n, select_range, t_length, savef)
+function PlotRaw(var, n, select_range, t_length, weight, savef)
 %Plot raw data
 %var: saved variable (cell)
 %n: # of var's row which you wnat to see the trace
@@ -39,7 +39,7 @@ end
 
 t = t(s_i:e_i);
 d = d(s_i:e_i);
-    
+
 
 %%
 sampf =  1/(t(2)-t(1));
@@ -50,10 +50,12 @@ range_p = range1*4;
 
 %%
 
-n_page = ceil((t(end) - t(1))/4);
+n_page = ceil((t(end) - t(1))/t_length/4);
 
+figh = zeros(1, n_page);
 for ii = 1:n_page %n_page
-    figure;
+    
+    figh(ii) = figure;
     %paper settings-------------------------------------------
     width = 1024;
     height = 768;
@@ -96,14 +98,21 @@ for ii = 1:n_page %n_page
         end
     end
     
-    fig = gcf;
+    fig = figure(figh(ii));
     fig.PaperPositionMode = 'auto';
     fig_pos = fig.PaperPosition;
     fig.PaperSize = [fig_pos(3) fig_pos(4)];
     
     if savef == 1
-        fname = 'trace';
-        print(fname, '-dps2', '-append')
+        if isnumeric(weight)
+            weight = num2str(weight);
+        end
+        if ii == 1
+            fname = ['Rawtrace_', weight, '_', num2str(t_length)];
+            mkdir(fname);
+        end
+        %print(['./', fname, '/pdf', num2str(ii)], '-dpdf', '-fillpage');
+        print(fname, '-dps2', '-append', '-fillpage')
         close;
     end
 end

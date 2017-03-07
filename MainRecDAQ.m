@@ -34,8 +34,8 @@ if exist('daq', 'file')==7
     Ch.Range = [-5.0, 5.0];
     Ch.Coupling = 'DC';
     
-    s.Rate = 30000; %sampling rate 30K
-    s.DurationInSeconds = 0.1;
+    s.Rate = 20000; %sampling rate 20K
+    s.DurationInSeconds = 2;
     %s.NotifyWhenDataAvailableExceeds = s.Rate * s.DurationInSeconds / 10;
     
     capture.plotTimeSpan = 2;   % Live Plot Duration
@@ -150,6 +150,12 @@ hGui.startDAQButton = uicontrol('Style', 'Pushbutton', 'String', 'Start', 'Units
 %Save Button
 hGui.save = uicontrol('Style', 'Pushbutton', 'String', 'Save Vars', 'FontSize', 14,...
     'Position', [10, 20, 100 50], 'Callback', {@saveVars, hGui});
+
+%
+%PDF Button
+hGui.printPDF = uicontrol('Style', 'Pushbutton', 'String', 'PDF', 'FontSize', 14,...
+    'Position', [120, 20, 100, 50], 'callback', {@printPDF, hGui});
+%}
 end % end of createUI
 
 %%
@@ -254,6 +260,23 @@ savedata = evalin('base', get(hGui.VarName, 'String'));
 save(get(hGui.VarName, 'String'), 'savedata');
 
 save SaveVars.mat savedata
+end
+
+%%
+function printPDF(~, ~, hGui)
+global captNum
+
+savedata = evalin('base', get(hGui.VarName, 'String'));
+%captureData = savedata{captNum};
+
+duration = get(hGui.CaptureDuration, 'string');
+%save histogram
+%PlotHist(captureData, 1, 3, duration, ['', num2str(captNum)])
+%save raw trace
+PlotRaw(savedata, captNum, 1, str2double(duration), ['', num2str(captNum)], 1)
+
+
+
 end
 
 %%

@@ -1,4 +1,4 @@
-function PlotHist(var, n, th, rectime, weight)
+function PlotHist(var, n, th, rectime, t_start, weight)
 % Plot raw trace and Histogram, with rectime/10 sec bin width).
 % var: name of cell variable ('savedata')
 % n: trial number to show
@@ -6,13 +6,13 @@ function PlotHist(var, n, th, rectime, weight)
 % rectime: recording time. rectime/10 is used for bin wdith.
 % weight: number or string, if this parameters is set, PDF file of the plot
 % is saved in the working directry.
- xd   g
+
 switch nargin
-    case 5
+    case 6
         if isnumeric(weight)
             weight = num2str(weight);
         end
-    case 4
+    case 5
         weight =  '' ;
 end
 
@@ -25,11 +25,29 @@ else
     y = var(:,2);
 end
 
-%find spikes
-[~,ind] = findpeaks(y,'MinPeakHeight',th, 'MinPeakDistance', 20, 'MaxPeakWidth', 30, 'MinPeakWidth', 10) ;
-%slope check (threshold * 0.8 mV/ 0.5ms)
+%% set start position
+if isempty(t_start)
+    ts_i = 1;
+else
+    ts_i = find(t < t_start, 1, 'last')+1;
+end
 
+t = t(ts_i:end);
+y = y(ts_i:end);
+%%
+
+%find spikes
+
+if length(th) == 1
+    [~,ind_min] = findpeaks(y,'MinPeakHeight',th, 'MinPeakProminence', th*0.8);% 'MinPeakDistance', 10, 'MaxPeakWidth', 30);%, 'MinPeakWidth', 10) ;
+    ind =  ind_min;
+elseif length(th) ==  2
+    [~,ind_min] = findpeaks(y,'MinPeakHeight',th(1), 'MinPeakProminence', th(1)*0.8);%, 'MinPeakDistance', 10);%, 'MaxPeakWidth', 30);%, 'MinPeakWidth', 10) ;
+    [~,ind_max] = findpeaks(y,'MinPeakHeight',th(2), 'MinPeakProminence', th(2)*0.8);%, 'MinPeakDistance', 10);%, 'MaxPeakWidth', 30);%, 'MinPeakWidth', 10) ;
+    ind = setdiff(ind_min, ind_max);
+end
 %{
+%slope check (threshold * 0.8 mV/ 0.5ms)
 ind2 = ind1 - 0.3*30000/1000; % 0.5ms before peak
 slope = y(ind1) - y(ind2);
 ind = ind1(slope > th*0.8);
@@ -51,7 +69,7 @@ subplot(2,1,1)
 plot(t, y);
 xlim([t(1), t(end)]);
 hold on;
-plot(t(ind), th, 'm*');
+plot(t(ind), th(1), 'm*');
 hold off
 ax = gca;
 outerpos = ax.OuterPosition;
@@ -65,8 +83,9 @@ ax.Position = [left bottom ax_width ax_height];
 %% histogram
 subplot(2,1,2)
 
-binw = rectime*5; % binned with 100 ms
+binw = rectime*10; % binned with 100 ms
 h = histogram(t(ind), binw); 
+disp(max(h.Values));
 xlim([t(1), t(end)]);
 ax = gca;
 outerpos = ax.OuterPosition;
@@ -93,6 +112,7 @@ fig.PaperSize = [fig_pos(3) fig_pos(4)];
 
 if nargin ==  5
     title(['Weight = ', weight, ' g']);
+    %print(fig,['Histogram_',weight],'-dpdf', '-fillpage')
     print(fig,['Histogram_',weight],'-dpdf')
 end
 
