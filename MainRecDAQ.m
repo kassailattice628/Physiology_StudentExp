@@ -29,12 +29,13 @@ if exist('daq', 'file')==7
     s = daq.createSession('ni');
     
     % Device ID setting
-    Ch = addAnalogInputChannel(s, 'Dev1', 0, 'Voltage');
+    Ch = addAnalogInputChannel(s, 'Dev3', 0, 'Voltage');
     Ch.TerminalConfig = 'Differential';
     Ch.Range = [-5.0, 5.0];
     Ch.Coupling = 'DC';
     
-    s.Rate = 20000; %sampling rate 20K
+    s.Rate = 30000; %sampling rate 20K
+    disp(s)
     s.DurationInSeconds = 2;
     %s.NotifyWhenDataAvailableExceeds = s.Rate * s.DurationInSeconds / 10;
     

@@ -1,4 +1,4 @@
-function PlotHist(var, n, th, rectime, t_start, weight)
+function ind =  PlotHist(var, n, th, rectime, t_start, weight)
 % Plot raw trace and Histogram, with rectime/10 sec bin width).
 % var: name of cell variable ('savedata')
 % n: trial number to show
@@ -46,6 +46,7 @@ elseif length(th) ==  2
     [~,ind_max] = findpeaks(y,'MinPeakHeight',th(2), 'MinPeakProminence', th(2)*0.8);%, 'MinPeakDistance', 10);%, 'MaxPeakWidth', 30);%, 'MinPeakWidth', 10) ;
     ind = setdiff(ind_min, ind_max);
 end
+
 %{
 %slope check (threshold * 0.8 mV/ 0.5ms)
 ind2 = ind1 - 0.3*30000/1000; % 0.5ms before peak
