@@ -111,8 +111,8 @@ for ii = 1:n_page %n_page
             fname = ['Rawtrace_', weight, '_', num2str(t_length)];
             mkdir(fname);
         end
-        %print(['./', fname, '/pdf', num2str(ii)], '-dpdf', '-fillpage');
-        print(fname, '-dps2', '-append', '-fillpage')
+        print(['./', fname, '/pdf', num2str(ii)], '-dpdf', '-fillpage');
+        %print(fname, '-dps2', '-append', '-fillpage')
         close;
     end
 end

@@ -1,3 +1,4 @@
+
 function MainRecDAQ
 
 close all
@@ -10,37 +11,30 @@ captNum = 0;
 % open GUI
 hGui = createUI(s, capture);
 
-% start monitring
-%startDAQ([],[], hGui);
-
-%% nested functions
-
-
 end % end of MainRecDAQ
 
 
 %% %%%%%%%%%%%%%%%%%%%%  subfunctions %%%%%%%%%%%%%%%%%%%% %%
 
-
-%%
+%% DAQ setting
 function [s, Ch, capture] = setDAQsession
 
 if exist('daq', 'file')==7
     s = daq.createSession('ni');
     
     % Device ID setting
-    Ch = addAnalogInputChannel(s, 'Dev3', 0, 'Voltage');
+    Ch = addAnalogInputChannel(s, 'Dev1', 0, 'Voltage');
     Ch.TerminalConfig = 'Differential';
     Ch.Range = [-5.0, 5.0];
     Ch.Coupling = 'DC';
     
-    s.Rate = 30000; %sampling rate 20K
+    s.Rate = 20*1000; %sampling rate 20K
     disp(s)
     s.DurationInSeconds = 2;
     %s.NotifyWhenDataAvailableExceeds = s.Rate * s.DurationInSeconds / 10;
     
     capture.plotTimeSpan = 2;   % Live Plot Duration
-    capture.TimeSpan = 5;       % Captured data duration (after trigger detected)
+    capture.TimeSpan = 5000;       % Captured data duration (after trigger detected)
     
     callbackTimeSpan = double(s.NotifyWhenDataAvailableExceeds)/s.Rate;
     capture.bufferTimeSpan = max([capture.plotTimeSpan, capture.TimeSpan*2, callbackTimeSpan*3]);
@@ -56,66 +50,72 @@ end
 
 end
 
-%%
+%% GUI
 function hGui = createUI(s, c)
-% Create GUI and configure callback functions
+% Create GUI, configure callback functions
 % "s" is DAQ session
+% "c" is data capture setting
 
+%##########################################################################
+% Maing Window
 hGui.Fig = figure('NumberTitle', 'off', 'Resize', 'off', 'Position', [10 200 1000 650],...
     'DeleteFcn', {@endDAQ, s});
 
-% Plot Field
+
 %##########################################################################
-%Create the continous data plot axes
-%(one line per acquisition channel)
+% Plot Field1
+%continous data plot axes
 hGui.Axes1 = axes('Units', 'Pixels', 'Position', [400 420 580 200]);
 hGui.LivePlot = plot(0, zeros(1, numel(s.Channels)));
 xlabel('Time (s)');
 ylabel('Voltage (mV)');
 title('Live Plot');
 
+% Plot Field2
 %Create the capture data plot axes
-%(one line per acquisition channle)
 hGui.Axes2 = axes('Units', 'Pixels', 'Position', [400 150 580 200]);
 hGui.CapturePlot = plot(NaN, NaN(1, numel(s.Channels)));
 xlabel('Time (s)');
 ylabel('Voltage (mv)');
 title('Captured Data');
 
-% Edit Field
+
 %##########################################################################
-% Select Sampling rate
+% Edit Params Field
+
+%Sampling rate(Hz)
 hGui.txtSampleRate = uicontrol('Style', 'Text', 'String', 'Sample Rate (Hz):', 'Position', [10 500 100 25],...
     'HorizontalAlignment', 'Right');
 hGui.SampleRate = uicontrol('Style', 'Edit', 'String', s.Rate , 'Units','Pixels', 'Position', [120 500 100 30]);
 
-% Set Live plot Duration 
+%Live plot Duration (s)
 hGui.txtLiveDuration = uicontrol('Style', 'Text', 'String', 'Live Duration (s):', 'Position', [10 460 100 25],...
     'HorizontalAlignment', 'Right');
 hGui.LiveDuration = uicontrol('Style', 'Edit', 'String', c.plotTimeSpan, 'Units','Pixels', 'Position', [120 460 100 30]);
 
+%Y axis range (mV)
 uicontrol('Style', 'Text', 'String', 'Live Y-axis (mV)', 'Position', [10 420 100 25], 'HorizontalAlignment', 'Right');
 hGui.LiveYaxis = uicontrol('Style', 'Edit', 'String', c.TimeSpan, 'Position', [120 420 100 30]);
 uicontrol('Style', 'Text', 'String', '0: Auto ylim', 'Position', [225 420 100 25], 'HorizontalAlignment', 'Left');
 
 
 %###############################
-% Select Channel for Trigger
+% Trigger Channel (fixed)
 hGui.txtTrigChannel = uicontrol('Style', 'Text', 'String', 'Trig Channel:', 'Position', [10 360 100 25],...
     'HorizontalAlignment', 'Right');
 hGui.TrigChannel = uicontrol('Style', 'Text', 'String', 'Ch(1)', 'Units','Pixels', 'Position', [120 355 100 30]);
 
-% Trigger Level (Threshold)
+% Trigger Level (mV)
 hGui.txtTrigLevel = uicontrol('Style', 'Text', 'String', 'Trig Level (mV):', 'Position', [10 320 100 25],...
     'HorizontalAlignment', 'Right');
 hGui.TrigLevel = uicontrol('Style', 'Edit', 'String', 800, 'Units','Pixels', 'Position', [120 320 100 30]);
 
-% Trig Slope
+% Triger Slope (V/s)... not used for now...
 hGui.txtTrigSlope = uicontrol('Style', 'Text', 'String', 'Trig Sloe (V/s):', 'Position', [10 280 100 25],...
     'HorizontalAlignment', 'Right');
 hGui.TrigSlope = uicontrol('Style', 'Edit', 'String', 200, 'Units','Pixels', 'Position', [120 280 100 30]);
 
-% default setting: mydata
+% File name...default setting: mydata
 hGui.txtVarName = uicontrol('Style', 'Text', 'String', 'Variable Name:', 'Position', [10 240 100 25],...
     'HorizontalAlignment', 'Right');
 hGui.VarName = uicontrol('Style', 'Edit', 'String', 'mydata', 'Units','Pixels', 'Position', [120 240 100 30]);
@@ -125,16 +125,18 @@ hGui.txtCaptNum = uicontrol('Style', 'Text', 'String', '#=:', 'Position', [225, 
 % Set capture start timing (ms from the trigger timing)
 hGui.txtCapturePreTrig = uicontrol('Style', 'Text', 'String', 'Capture Pre-Trig Duration (s):', 'Position', [10 200 100 25],...
     'HorizontalAlignment', 'Right');
-hGui.CapturePreTrig = uicontrol('Style', 'Edit', 'String', 0, 'Units','Pixels', 'Position', [120 200 100 30]);
+hGui.CapturePreTrig = uicontrol('Style', 'Edit', 'String', 1, 'Units','Pixels', 'Position', [120 200 100 30]);
 
 % Set capture Duration
 hGui.txtCaptureDuration = uicontrol('Style', 'Text', 'String', 'Capture Post-Trig Duration (s):', 'Position', [10 160 100 25],...
     'HorizontalAlignment', 'Right');
-hGui.CaptureDuration = uicontrol('Style', 'Edit', 'String', 5, 'Units','Pixels', 'Position', [120 160 100 30]);
+hGui.CaptureDuration = uicontrol('Style', 'Edit', 'String', 10, 'Units','Pixels', 'Position', [120 160 100 30]);
 
 
-% Button Field
+
 %##########################################################################
+% Button Field
+
 %Stop Button
 hGui.stopDAQButton = uicontrol('Style', 'Pushbutton', 'String', 'Pause', 'Units', 'Pixels', 'FontSize', 14,...
     'Position', [10 550 100 50], 'Callback', {@pauseDAQ, s, hGui});
@@ -152,25 +154,14 @@ hGui.startDAQButton = uicontrol('Style', 'Pushbutton', 'String', 'Start', 'Units
 hGui.save = uicontrol('Style', 'Pushbutton', 'String', 'Save Vars', 'FontSize', 14,...
     'Position', [10, 20, 100 50], 'Callback', {@saveVars, hGui});
 
-%
 %PDF Button
 hGui.printPDF = uicontrol('Style', 'Pushbutton', 'String', 'PDF', 'FontSize', 14,...
     'Position', [120, 20, 100, 50], 'callback', {@printPDF, hGui});
-%}
+
 end % end of createUI
 
-%%
-function startCapture(hObject, ~, hGui)
-global captNum
-captNum = captNum + 1;
-if get(hObject, 'value')
-    for ii = 1:numel(hGui.CapturePlot)
-        set(hGui.CapturePlot(ii), 'XData', NaN, 'YData', NaN);
-    end
-end
-end
 
-%%
+%% pause 
 function pauseDAQ(~, ~, s, hGui)
 global dataListener errorListener
 %GUI
@@ -194,9 +185,21 @@ delete(dataListener);
 delete(errorListener);
 end
 
-%%
+%% data capture
+function startCapture(hObject, ~, hGui)
+global captNum
+captNum = captNum + 1;
+if get(hObject, 'value')
+    for ii = 1:numel(hGui.CapturePlot)
+        set(hGui.CapturePlot(ii), 'XData', NaN, 'YData', NaN);
+    end
+end
+end
+
+%% run live
 function startDAQ(~, ~, hGui)
 global s capture dataListener errorListener
+
 % GUI
 set(hGui.SampleRate,'Style', 'Text', 'Position', [120 495 100 30]);
 set(hGui.LiveDuration,'Style', 'Text', 'Position', [120 455 100 30]);
@@ -222,7 +225,6 @@ if s.IsRunning == false
     capture.bufferTimeSpan = max([capture.plotTimeSpan, capture.TimeSpan * 2, callbackTimeSpan * 3]);
     capture.bufferSize = round(capture.bufferTimeSpan * s.Rate);
     
-    
     % Restart
     dataListener = addlistener(s, 'DataAvailable', @(src, event) dataCapture(src, event, capture, hGui));
     errorListener = addlistener(s, 'ErrorOccurred', @(src, event) disp(getReport(event.Error)));
@@ -235,7 +237,7 @@ if s.IsRunning == false
 end
 end
 
-%%
+%% Window close fcn
 function endDAQ(~, ~, s)
 global dataListener errorListener
 if isvalid(s)
@@ -247,10 +249,9 @@ if isvalid(s)
     delete(errorListener);
     delete(s);
 end
-
 end
 
-%%
+%% Save Data
 function saveVars(~, ~, hGui)
 %Save captureed data to the mat file
 
@@ -263,25 +264,22 @@ save(get(hGui.VarName, 'String'), 'savedata');
 save SaveVars.mat savedata
 end
 
-%%
+%% Export figure to PDF file
 function printPDF(~, ~, hGui)
 global captNum
 
 savedata = evalin('base', get(hGui.VarName, 'String'));
-%captureData = savedata{captNum};
 
 duration = get(hGui.CaptureDuration, 'string');
-%save histogram
-%PlotHist(captureData, 1, 3, duration, ['', num2str(captNum)])
-%save raw trace
 PlotRaw(savedata, captNum, 1, str2double(duration), ['', num2str(captNum)], 1)
-
-
 
 end
 
-%%
+
+
 %%#######################################################################%%
+%% Capture data event
+
 function dataCapture(src, event, c, hGui)
 %dataCapture is called when DAQ data are readable.
 
@@ -385,7 +383,7 @@ end
 drawnow;
 end
 
-%%
+%% Detect triger event
 function [trigDetected, trigMoment] = detectTrig(prevData, latestData, trigConfig)
 %check signal level
 trigCondition1 = latestData(:, 1 + trigConfig.Channel) > trigConfig.Level;
