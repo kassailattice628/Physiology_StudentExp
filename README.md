@@ -1,7 +1,7 @@
 # Quick NI-DAQ recording on MATLAB
 NIDAQ (例えば USB6009) を使用して GUI つき簡易記録．
 
-ーーー
+---
 ## Requirement
 1. Windwos 7, 8 (64bit) で動作確認．  
 2. MATLAB 64bit R2016 a, b で動作確認．  
@@ -51,23 +51,25 @@ Sampling Rate 及び，Live plot の範囲なども，GUI から変更
 1. 画面丸ごと保存．
 
 ---
-## Usage <<PlotHist.m>>
-```PlotHist.m
-> PlotHist(var_name, num_trial, threshold for detect spike, recording time, weight)
+## Usage <<PlotHist2.m>>
+```PlotHist2.m
+> PlotHist2(th, t_start, weight, fit_range)
 ```
 1. 保存したデータを読み込んで，threshold で detect した spike から 簡易的に histogram を書き出す．
-2. histogram の ビン幅は，recording time /10 に設定してあるので，正しく入力されていれば，100 ms．
+2. histogram の ビン幅は, 100 ms．
 3. weight は，使用したおもりの重量を数値か文字列で入れる．
-4. weight 引数を入れている場合vは，figure を PDF にも保存する．
+4. 順応の速度として，exponentail で histogram を fitting して decay tau (sec)をざっくり見る．
 
 ---
 ### ToDos
-- Histogram の減衰を exponential で fit するかどうか？（単一神経ではないので意味ないか？）
+- フィルタがいまいち？
 
+---
 ### Done
 - Data の保存は，記録終了時に自動で 保存する方がいいか >>> 個別ファイルにして保存するようにした．まとめたファイルにも保存可能．
-- 記録開始の Trigger 設定を見直す． >>>> event.data を *1000 して mV 表示にした．  
-- Trigger なしでも記録できるようにする． <<<< これはやらない？  
-- Threshold, slope(はやめる？)． <<<< これも mV 表示で対応できた？  
-- Sampling Rate の確認．（あってない？）．デフォルト 50K とかにするか >>>> USB6009 は max 48K なので 30K をデフォルトにした >>>> 20K に下げる．  v
+- 記録開始の Trigger 設定を見直す． >>> event.data を *1000 して mV 表示にした．  
+- Trigger なしでも記録できるようにする． <<< これはやらない？  
+- Threshold, slope(はやめる？)． <<< これも mV 表示で対応できた？  
+- Sampling Rate の確認．（あってない？）．デフォルト 50K とかにするか >>> USB6009 は max 48K なので 30K をデフォルトにした >>>> 20K に下げる．
+- Histogram の減衰を exponential で fit するかどうか？（単一神経ではないので意味ないか？）>>> 一応やった
 

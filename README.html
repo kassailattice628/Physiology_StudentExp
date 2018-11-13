@@ -1,29 +1,465 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <meta name="generator" content="pandoc">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title></title>
-  <style type="text/css">code{white-space: pre;}</style>
-  <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
-  <![endif]-->
+<title>README.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: "Segoe WPC", "Segoe UI", "SFUIText-Light", "HelveticaNeue-Light", sans-serif, "Droid Sans Fallback";
+	font-size: 14px;
+	padding: 0 12px;
+	line-height: 22px;
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	color: #4080D0;
+	text-decoration: none;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+h1 code,
+h2 code,
+h3 code,
+h4 code,
+h5 code,
+h6 code {
+	font-size: inherit;
+	line-height: auto;
+}
+
+a:hover {
+	color: #4080D0;
+	text-decoration: underline;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left: 5px solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 14px;
+	line-height: 19px;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+.mac code {
+	font-size: 12px;
+	line-height: 18px;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+/** Theming */
+
+.vscode-light,
+.vscode-light pre code {
+	color: rgb(30, 30, 30);
+}
+
+.vscode-dark,
+.vscode-dark pre code {
+	color: #DDD;
+}
+
+.vscode-high-contrast,
+.vscode-high-contrast pre code {
+	color: white;
+}
+
+.vscode-light code {
+	color: #A31515;
+}
+
+.vscode-dark code {
+	color: #D7BA7D;
+}
+
+.vscode-light pre:not(.hljs),
+.vscode-light code > div {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre:not(.hljs),
+.vscode-dark code > div {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre:not(.hljs),
+.vscode-high-contrast code > div {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+.vscode-light blockquote,
+.vscode-dark blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.vscode-high-contrast blockquote {
+	background: transparent;
+	border-color: #fff;
+}
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family:  "Meiryo", "Segoe WPC", "Segoe UI", "SFUIText-Light", "HelveticaNeue-Light", sans-serif, "Droid Sans Fallback";
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
 </head>
 <body>
-<h1 id="quick-ni-daq-recording">Quick NI-DAQ recording</h1>
+<h1 id="quick-ni-daq-recording-on-matlab">Quick NI-DAQ recording on MATLAB</h1>
 <p>NIDAQ (例えば USB6009) を使用して GUI つき簡易記録．</p>
-<h2 id="usage">Usage</h2>
-<p>MainRecDAQ.m を MATLAB 上で実行．<br />
-Live Plot が自動でスタート．止めたいときは，Pause ボタン．再開する場合は，Start ボタン．<br />
-Live Plot は現在の入力を見ているだけで，記録はしてない．</p>
-<p>データを記録する場合は，Capture．<br />
-Capture を押すと 域値を超える入力がくるまで待機．域値の設定は，Pause 中に Trigger Level で編集．<br />
-取得データの範囲（時間）は，Trigger の前後数秒． 設定は，Pause 中に Capture Pre-Trig, Post-Trig で編集．</p>
-<p>Triger 入力されると，指定した時間文のデータが Varibale Name で指定した 変数で MATLAB の workspace に保存．<br />
-複数回記録した場合は，データが追加．<br />
-記録したデータを書きだすときは，GUI 左下の SaveVars ボタンを押す．</p>
+<hr>
+<h2 id="requirement">Requirement</h2>
+<ol>
+<li>Windwos 7, 8 (64bit) で動作確認．</li>
+<li>MATLAB 64bit R2016 a, b で動作確認．</li>
+<li>Data acquisition toolbox (64bit) 必須．</li>
+<li>NIDAQ サポートパッケージ（MATLAB アドオンから入手）</li>
+</ol>
+<h3 id="instration-drivers">Instration Drivers</h3>
+<p>おそらく MATLAB R2016a 以降は，MATLAB のアドオン追加機能からドライバを入れた方が良い．<br>
+（ホームタブメニュー &gt; （環境）アドオン &gt; ハードウェアサポートパッケージの入手）<br>
+NI から最新版の NIDAQ-mxをインストールしても，機器が MATLAB を介して認識されない場合がある．</p>
+<h3 id="daq-devices">DAQ devices</h3>
+<p>NIDAQ USB-6009．これはおそらくなんでも使える．<br>
+NI デバイスモニタ など PC 上で認識されてるデバイス ID を MainRecDAQ の setDAQsession に書く必要あり．<br>
+デフォルトは 'Dev2'.</p>
+<h3 id="input-channel">Input Channel</h3>
+<p>現在は，差動入力で Ch(1) しか設定していない（AI0)．</p>
+<hr>
+<h2 id="usage-mainrecdaqm">Usage &lt;&lt; MainRecDaQ.m&gt;&gt;</h2>
+<pre class="hljs"><code><div>&gt; cd ('path/to/program/folders/')
+&gt; MainRecDAQ
+</div></code></pre>
+<ol>
+<li>
+<p>Start で Live Plot がスタート．Live 止めるときは，Pause ボタン．Live 再開は，Start ボタン．<br>
+Lie Plot は現在の入力を見ているだけで，記録はしてない．</p>
+</li>
+<li>
+<p>データを記録する場合は，Capture．<br>
+Capture を押すと 域値を超える入力がくるまで待機．域値の設定は，Pause 中に Trigger Level で編集．<br>
+取得データの範囲（時間）は，Trigger の前後数秒． 設定は，Pause 中に Capture Pre-Trig, Post-Trig で編集．<br>
+Pre-Trig で設定した時間を経過してない場合は，，エラーが出るので注意．</p>
+</li>
+<li>
+<p>Triger 検出すると，指定した時間分のデータが Varibale Name で指定した 変数で MATLAB の workspace に保存．<br>
+複数回記録した場合は，その変数（cell 配列）にデータが追加される． Capture が終了するごとに，mydata_1.mat のように
+個別にファイルは保存されていく．
+まとめて記録したデータを書きだすときは，GUI 左下の SaveVars ボタンを押すと，cell 全部が１つのファイルで保存．</p>
+</li>
+</ol>
 <h3 id="others">Others</h3>
-<p>Sampling Rate 及び，Live plot の範囲も，GUI から変更可能．</p>
+<p>Sampling Rate 及び，Live plot の範囲なども，GUI から変更</p>
+<hr>
+<h2 id="usage-plotrawm">Usage &lt;&lt;PlotRaw.m&gt;&gt;</h2>
+<pre class="hljs"><code><div>&gt; PlotRaw(var_name, num_trial, 1, 1(sec), savef)
+</div></code></pre>
+<ol>
+<li>画面丸ごと保存．</li>
+</ol>
+<hr>
+<h2 id="usage-plothistm">Usage &lt;&lt;PlotHist.m&gt;&gt;</h2>
+<pre class="hljs"><code><div>&gt; PlotHist(var_name, num_trial, threshold for detect spike, recording time, weight)
+</div></code></pre>
+<ol>
+<li>保存したデータを読み込んで，threshold で detect した spike から 簡易的に histogram を書き出す．</li>
+<li>histogram の ビン幅は，recording time /10 に設定してあるので，正しく入力されていれば，100 ms．</li>
+<li>weight は，使用したおもりの重量を数値か文字列で入れる．</li>
+<li>weight 引数を入れている場合vは，figure を PDF にも保存する．</li>
+</ol>
+<hr>
+<h3 id="todos">ToDos</h3>
+<ul>
+<li>Histogram の減衰を exponential で fit するかどうか？（単一神経ではないので意味ないか？）</li>
+</ul>
+<h3 id="done">Done</h3>
+<ul>
+<li>Data の保存は，記録終了時に自動で 保存する方がいいか &gt;&gt;&gt; 個別ファイルにして保存するようにした．まとめたファイルにも保存可能．</li>
+<li>記録開始の Trigger 設定を見直す． &gt;&gt;&gt;&gt; event.data を *1000 して mV 表示にした．</li>
+<li>Trigger なしでも記録できるようにする． &lt;&lt;&lt;&lt; これはやらない？</li>
+<li>Threshold, slope(はやめる？)． &lt;&lt;&lt;&lt; これも mV 表示で対応できた？</li>
+<li>Sampling Rate の確認．（あってない？）．デフォルト 50K とかにするか &gt;&gt;&gt;&gt; USB6009 は max 48K なので 30K をデフォルトにした &gt;&gt;&gt;&gt; 20K に下げる．  v</li>
+</ul>
+
 </body>
 </html>
