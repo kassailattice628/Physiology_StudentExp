@@ -42,10 +42,14 @@ y = y(ts_i:end);
 
 
 %% Highpass filter ’¼‚·
-[b,a] = butter(4, [0.02 0.5]);
+sampt = t(2)-t(1);
+Fs = 1/sampt;
+
+%bandpass
+[b,a] = butter(4, [300/(Fs/2), 3000/(Fs/2)]);
 y = filtfilt(b,a,y);
 
-%% Peal detection
+%% Peak detection
 if length(th) == 1
     [~,ind_min] = findpeaks(y,'MinPeakHeight',th, 'MinPeakProminence', th*0.8);% 'MinPeakDistance', 10, 'MaxPeakWidth', 30);%, 'MinPeakWidth', 10) ;
     ind1 =  ind_min;

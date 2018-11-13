@@ -438,27 +438,29 @@ Pre-Trig で設定した時間を経過してない場合は，，エラーが�
 <li>画面丸ごと保存．</li>
 </ol>
 <hr>
-<h2 id="usage-plothistm">Usage &lt;&lt;PlotHist.m&gt;&gt;</h2>
-<pre class="hljs"><code><div>&gt; PlotHist(var_name, num_trial, threshold for detect spike, recording time, weight)
+<h2 id="usage-plothist2m">Usage &lt;&lt;PlotHist2.m&gt;&gt;</h2>
+<pre class="hljs"><code><div>&gt; PlotHist2(th, t_start, weight, fit_range)
 </div></code></pre>
 <ol>
 <li>保存したデータを読み込んで，threshold で detect した spike から 簡易的に histogram を書き出す．</li>
-<li>histogram の ビン幅は，recording time /10 に設定してあるので，正しく入力されていれば，100 ms．</li>
+<li>histogram の ビン幅は, 100 ms．</li>
 <li>weight は，使用したおもりの重量を数値か文字列で入れる．</li>
-<li>weight 引数を入れている場合vは，figure を PDF にも保存する．</li>
+<li>順応の速度として，exponentail で histogram を fitting して decay tau (sec)をざっくり見る．</li>
 </ol>
 <hr>
 <h3 id="todos">ToDos</h3>
 <ul>
-<li>Histogram の減衰を exponential で fit するかどうか？（単一神経ではないので意味ないか？）</li>
+<li>フィルタが微妙？</li>
 </ul>
+<hr>
 <h3 id="done">Done</h3>
 <ul>
 <li>Data の保存は，記録終了時に自動で 保存する方がいいか &gt;&gt;&gt; 個別ファイルにして保存するようにした．まとめたファイルにも保存可能．</li>
-<li>記録開始の Trigger 設定を見直す． &gt;&gt;&gt;&gt; event.data を *1000 して mV 表示にした．</li>
-<li>Trigger なしでも記録できるようにする． &lt;&lt;&lt;&lt; これはやらない？</li>
-<li>Threshold, slope(はやめる？)． &lt;&lt;&lt;&lt; これも mV 表示で対応できた？</li>
-<li>Sampling Rate の確認．（あってない？）．デフォルト 50K とかにするか &gt;&gt;&gt;&gt; USB6009 は max 48K なので 30K をデフォルトにした &gt;&gt;&gt;&gt; 20K に下げる．  v</li>
+<li>記録開始の Trigger 設定を見直す． &gt;&gt;&gt; event.data を *1000 して mV 表示にした．</li>
+<li>Trigger なしでも記録できるようにする． &lt;&lt;&lt; これはやらない？</li>
+<li>Threshold, slope(はやめる？)． &lt;&lt;&lt; これも mV 表示で対応できた？</li>
+<li>Sampling Rate の確認．（あってない？）．デフォルト 50K とかにするか &gt;&gt;&gt; USB6009 は max 48K なので 30K をデフォルトにした &gt;&gt;&gt;&gt; 20K に下げる．</li>
+<li>Histogram の減衰を exponential で fit するかどうか？（単一神経ではないので意味ないか？）&gt;&gt;&gt; 一応やった</li>
 </ul>
 
 </body>

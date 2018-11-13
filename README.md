@@ -62,7 +62,7 @@ Sampling Rate 及び，Live plot の範囲なども，GUI から変更
 
 ---
 ### ToDos
-- フィルタがいまいち？
+- フィルタが微妙？
 
 ---
 ### Done
