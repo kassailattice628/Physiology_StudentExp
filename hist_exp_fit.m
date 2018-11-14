@@ -28,5 +28,4 @@ hold on
 plot(t_fit, y_fit(t_fit-t1), 'r-', 'LineWidth', 1)
 hold off
 
-
 end

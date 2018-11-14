@@ -50,12 +50,21 @@ Fs = 1/sampt;
 y = filtfilt(b,a,y);
 
 %% Peak detection
+
+%Min Peak Distance (point)
+mpd = 1/1000 * Fs;
 if length(th) == 1
-    [~,ind_min] = findpeaks(y,'MinPeakHeight',th, 'MinPeakProminence', th*0.8);% 'MinPeakDistance', 10, 'MaxPeakWidth', 30);%, 'MinPeakWidth', 10) ;
+    %[~,ind_min] = findpeaks(y,'MinPeakHeight',th, 'MinPeakProminence', th*0.8);% 'MinPeakDistance', 10, 'MaxPeakWidth', 30);
+    
+    %MinPeakHeight: minimum peal amplitude
+    %MinPealProminence: prominence=amplitude from the baseline
+    %Min-MaxPeakDistance: point??
+    
+    [~,ind_min] = findpeaks(y, 'MinPeakHeight',th, 'MinPeakDistance', mpd);
     ind1 =  ind_min;
 elseif length(th) ==  2
-    [~,ind_min] = findpeaks(y,'MinPeakHeight',th(1), 'MinPeakProminence', th(1)*0.8);%, 'MinPeakDistance', 10);%, 'MaxPeakWidth', 30);%, 'MinPeakWidth', 10) ;
-    [~,ind_max] = findpeaks(y,'MinPeakHeight',th(2), 'MinPeakProminence', th(2)*0.8);%, 'MinPeakDistance', 10);%, 'MaxPeakWidth', 30);%, 'MinPeakWidth', 10) ;
+    [~,ind_min] = findpeaks(y, 'MinPeakHeight',th(1), 'MinPeakDistance', mpd);
+    [~,ind_max] = findpeaks(y, 'MinPeakHeight',th(2), 'MinPeakDistance', mpd);
     ind1 = setdiff(ind_min, ind_max);
 end
 
@@ -75,9 +84,13 @@ figure;
 subplot(2,1,1)
 plot(t, y);
 xlim([t(1), t(end)]);
+xlabel('Time (s)')
+ylabel('Voltage (mV)')
+title('Response to skin extension')
+
 hold on
 %% detected spikes
-plot(t(ind), th(1), 'm*');
+plot(t(ind), th(1), 'm.');
 hold off
 
 %% histogram
@@ -87,17 +100,14 @@ subplot(2,1,2)
 nbin = round((t(end) - t(1))/binw*1000);
 h = histogram(t(ind), nbin);
 xlim([t(1), t(end)]);
+xlabel('Time (s)')
 
-%% Fitting
-if size(fit_range, 1) == 1
-    hist_exp_fit(h, fit_range(1), fit_range(2))
-    
-elseif size(fit_range, 1) == 2
-    hist_exp_fit(h, fit_range(1,1), fit_range(1,2))
-    hist_exp_fit(h, fit_range(2,1), fit_range(2,2))
-    
+%% fit
+for i = 1:size(fit_range, 1)
+    hist_exp_fit(h, fit_range(i, 1), fit_range(i, 2))
 end
-%% savefig
+    
+%% Save figure as pdf
 fig = gcf;
 fig.PaperPositionMode = 'auto';
 fig_pos = fig.PaperPosition;
