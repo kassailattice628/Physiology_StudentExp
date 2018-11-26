@@ -1,4 +1,3 @@
-
 function MainRecDAQ
 
 close all
@@ -6,7 +5,8 @@ global s Ch capture hGui captNum
 
 % initialize parameters
 [s, Ch, capture] = setDAQsession;
-captNum = 0;
+%data#
+captNum = 1;
 
 % open GUI
 hGui = createUI(s, capture);
@@ -18,8 +18,8 @@ end % end of MainRecDAQ
 
 %% DAQ setting
 function [s, Ch, capture] = setDAQsession
-
-if exist('daq', 'file')==7
+%Default settings
+if exist('daq', 'file') == 7
     s = daq.createSession('ni');
     
     % Device ID setting
@@ -28,13 +28,16 @@ if exist('daq', 'file')==7
     Ch.Range = [-5.0, 5.0];
     Ch.Coupling = 'DC';
     
-    s.Rate = 20*1000; %sampling rate 20K
+    s.Rate = 15*1000; %sampling rate 15K
     disp(s)
-    s.DurationInSeconds = 2;
-    %s.NotifyWhenDataAvailableExceeds = s.Rate * s.DurationInSeconds / 10;
+    s.DurationInSeconds = 1;
+    %%%% s.NotifyWhenDataAvailableExceeds = s.Rate * s.DurationInSeconds / 10;
     
     capture.plotTimeSpan = 2;   % Live Plot Duration
-    capture.TimeSpan = 5000;       % Captured data duration (after trigger detected)
+    
+    capture.PreTrig = 1;
+    capture.PostTrig = 10;
+    capture.TimeSpan = capture.PreTrig + capture.PostTrig;    % Captured data duration (after trigger detected)
     
     callbackTimeSpan = double(s.NotifyWhenDataAvailableExceeds)/s.Rate;
     capture.bufferTimeSpan = max([capture.plotTimeSpan, capture.TimeSpan*2, callbackTimeSpan*3]);
@@ -84,7 +87,7 @@ title('Captured Data');
 % Edit Params Field
 
 %Sampling rate(Hz)
-hGui.txtSampleRate = uicontrol('Style', 'Text', 'String', 'Sample Rate (Hz):', 'Position', [10 500 100 25],...
+hGui.txtSampleRate = uicontrol('Style', 'Text', 'String', 'Sampling Rate (Hz):', 'Position', [10 500 100 25],...
     'HorizontalAlignment', 'Right');
 hGui.SampleRate = uicontrol('Style', 'Edit', 'String', s.Rate , 'Units','Pixels', 'Position', [120 500 100 30]);
 
@@ -95,7 +98,7 @@ hGui.LiveDuration = uicontrol('Style', 'Edit', 'String', c.plotTimeSpan, 'Units'
 
 %Y axis range (mV)
 uicontrol('Style', 'Text', 'String', 'Live Y-axis (mV)', 'Position', [10 420 100 25], 'HorizontalAlignment', 'Right');
-hGui.LiveYaxis = uicontrol('Style', 'Edit', 'String', c.TimeSpan, 'Position', [120 420 100 30]);
+hGui.LiveYaxis = uicontrol('Style', 'Edit', 'String', 0, 'Position', [120 420 100 30]);
 uicontrol('Style', 'Text', 'String', '0: Auto ylim', 'Position', [225 420 100 25], 'HorizontalAlignment', 'Left');
 
 
@@ -114,25 +117,31 @@ hGui.TrigLevel = uicontrol('Style', 'Edit', 'String', 800, 'Units','Pixels', 'Po
 hGui.txtTrigSlope = uicontrol('Style', 'Text', 'String', 'Trig Sloe (V/s):', 'Position', [10 280 100 25],...
     'HorizontalAlignment', 'Right');
 hGui.TrigSlope = uicontrol('Style', 'Edit', 'String', 200, 'Units','Pixels', 'Position', [120 280 100 30]);
+%hGui.TrigSlope = uicontrol('Style', 'Text', 'String', '------', 'Units','Pixels', 'Position', [120 280 100 30]);
 
 % File name...default setting: mydata
 hGui.txtVarName = uicontrol('Style', 'Text', 'String', 'Variable Name:', 'Position', [10 240 100 25],...
     'HorizontalAlignment', 'Right');
-hGui.VarName = uicontrol('Style', 'Edit', 'String', 'mydata', 'Units','Pixels', 'Position', [120 240 100 30]);
+hGui.VarName = uicontrol('Style', 'Edit', 'String', 'Group_X', 'Units','Pixels', 'Position', [120 240 100 30]);
 
 hGui.txtCaptNum = uicontrol('Style', 'Text', 'String', '#=:', 'Position', [225, 240, 50, 25], 'HorizontalAlignment', 'Left');
 
 % Set capture start timing (ms from the trigger timing)
 hGui.txtCapturePreTrig = uicontrol('Style', 'Text', 'String', 'Capture Pre-Trig Duration (s):', 'Position', [10 200 100 25],...
     'HorizontalAlignment', 'Right');
-hGui.CapturePreTrig = uicontrol('Style', 'Edit', 'String', 1, 'Units','Pixels', 'Position', [120 200 100 30]);
+hGui.CapturePreTrig = uicontrol('Style', 'Edit', 'String', c.PreTrig, 'Units','Pixels', 'Position', [120 200 100 30]);
 
 % Set capture Duration
 hGui.txtCaptureDuration = uicontrol('Style', 'Text', 'String', 'Capture Post-Trig Duration (s):', 'Position', [10 160 100 25],...
     'HorizontalAlignment', 'Right');
-hGui.CaptureDuration = uicontrol('Style', 'Edit', 'String', 10, 'Units','Pixels', 'Position', [120 160 100 30]);
+hGui.CaptureDuration = uicontrol('Style', 'Edit', 'String', c.PostTrig, 'Units','Pixels', 'Position', [120 160 100 30]);
 
-
+% Set Gain
+hGui.txtGain = uicontrol('Style', 'Text', 'String', 'Amp Gain:', 'Position', [10 110 100 25],...
+    'HorizontalAlignment', 'Right');
+gain = {'X100', 'X200', 'X500', 'X1000', 'X2000', 'X5000', 'X10K', 'X20K', 'X50K', 'X100K'}; 
+hGui.Gain = uicontrol('Style', 'popup', 'String', gain, 'Position', [120 110 100 30]);
+set(hGui.Gain, 'Value', 4);
 
 %##########################################################################
 % Button Field
@@ -210,6 +219,7 @@ set(hGui.TrigSlope,'Style', 'Text', 'Position', [120 275 100 30]);
 set(hGui.VarName,'Style', 'Text', 'Position', [120 235 100 30]);
 set(hGui.CapturePreTrig,'Style', 'Text', 'Position', [120 195 100 30]);
 set(hGui.CaptureDuration,'Style', 'Text', 'Position', [120 155 100 30]);
+
 
 if s.IsRunning == false
     % Reload params from GUI
@@ -297,7 +307,9 @@ else
 end
 
 %event.Data is shown in mV (event.Data is multiplied by 1000)
-latestData = [event.TimeStamps, event.Data*1000];
+g = get(hGui.Gain, 'Value');
+gain = [100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000];
+latestData = [event.TimeStamps, event.Data * gain(g)];
 
 %Update dataBuffer
 dataBuffer = [dataBuffer; latestData];
